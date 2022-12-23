@@ -5,43 +5,57 @@
 #include <dbus/dbus.h>
 #include <dbus/dbus-glib.h>
 
-// DBusConnection *init_bus()
-// {
-//   DBusGConnection *connection;
-//   DBusGError *err;
-//   int ret;
+#define ERROR_GET_CONNECTION    1
+#define ERROR_GET_NAME          2
+#define ERROR_GET_PROXY         3
+#define ERROR_ARGC_NUMBER       4
 
-//   dbus_error_init(err);
-//   // Соединяем с dbus, устанавливаем соединение, называемое объектом
-
-//   connection = dbus__g_bus_get(DBUS_BUS_SESSION, err);
-
-//   if (dbus_error_is_set(&err))
-//   {
-//     printf("connection error: :%s -- %s\n", err.name, err.message);
-//     dbus_error_free(err);
-//     return NULL;
-//   }
-//   /// Назначаем имя этому объекту
-//   ret = dbus_g_bus_request_name(connection, "hello.world.client", DBUS_NAME_FLAG_REPLACE_EXISTING, err);
-
-//   if (dbus_error_is_set(err))
-//   {
-//     printf("Name error: %s -- %s\n", err.name, err.message);
-//     dbus_error_free(rr);
-//     return NULL;
-//   }
-//   if (ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
-//     return NULL;
-
-//   return connection;
-// }
-
-void send_signal(DBusConnection *connection)
+int add_app_in_dbus(const char *string)
 {
-  DBusMessage *msg;
+  DBusConnection* connection;
+  DBusError err;
+
+  connection = dbus_bus_get(DBUS_BUS_SESSION, &err);
+
+  if (connection == NULL)
+  {
+    printf("Failed to open connection to bus: %s\n", err.message);
+    dbus_error_free(&err);
+    
+    return ERROR_GET_CONNECTION;
+  }
+
+  int ret = dbus_bus_request_name(connection, string, DBUS_NAME_FLAG_DO_NOT_QUEUE, &err);
+
+  if (dbus_error_is_set(&err))
+  {
+    printf("Name error: %s -- %s\n", err.name, err.message);
+    dbus_error_free(&err);
+
+    return ERROR_GET_NAME;
+  }
+
+  if (ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
+    return ERROR_GET_NAME;
+
+  if (connection == NULL)
+  {
+    printf("Failed to open connection to bus: %s\n", err.message);
+    dbus_error_free(&err);
+
+    return ERROR_GET_CONNECTION;
+  }
+
+  // dbus_connection_read_write(connection, 0);
+
+  return EXIT_SUCCESS;
+}
+
+void send_signal(DBusConnection* connection)
+{
+  DBusMessage* msg;
   DBusMessageIter arg;
-  char *str = "hello world!";
+  char* str = "hello world!";
 
   // Создать объект сигнала
   // param1: path (в этой логике это может быть любая строка, если она соответствует правилам)
@@ -53,12 +67,12 @@ void send_signal(DBusConnection *connection)
     return;
   }
 #if 0
-	 // Это зависит от необходимости добавления. Вообще говоря, сигнал является односторонней передачей, плюс это предложение становится односторонним одноадресным
-	 //param2: bus_name
-	if(!dbus_message_set_destination(msg, "hello.world.service"))
-        {
-                printf("memory error\n");
-        }
+  // Это зависит от необходимости добавления. Вообще говоря, сигнал является односторонней передачей, плюс это предложение становится односторонним одноадресным
+  //param2: bus_name
+  if (!dbus_message_set_destination(msg, "hello.world.service"))
+  {
+    printf("memory error\n");
+  }
 #endif
 
   // Некоторые интерфейсы для добавления параметров
@@ -74,11 +88,11 @@ void send_signal(DBusConnection *connection)
   return;
 }
 
-void send_method_call(DBusConnection *connection)
+void send_method_call(DBusConnection* connection)
 {
-  DBusMessage *msg;
+  DBusMessage* msg;
   DBusMessageIter arg;
-  DBusPendingCall *pending;
+  DBusPendingCall* pending;
   int a = 100;
   int b = 99;
   int sum;
@@ -104,11 +118,6 @@ void send_method_call(DBusConnection *connection)
     return;
   }
 
-  // Входящее сообщение, ожидая ответа
-  // param1: дескриптор соединения
-  // param2:　message
-  //  param3: эквивалент дескриптора обратного вызова для получения возвращенного сообщения
-  //  param4: сверхурочные. -1 представляет бесконечность
   if (!dbus_connection_send_with_reply(connection, msg, &pending, -1))
   {
     printf("no memeory!");
@@ -152,86 +161,48 @@ void send_method_call(DBusConnection *connection)
   return;
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
-  DBusConnection *connection;
-  DBusGConnection *conn;
-  GError *error;
-  DBusError err;
-  DBusGProxy *proxy;
-  char **name_list;
-  char **name_list_ptr;
+  if (argc != 2)
+    return ERROR_ARGC_NUMBER;
 
-  // g_type_init();
+  DBusGConnection* conn;
+  GError* error;
+  DBusGProxy* proxy;
+  char** name_list;
+  char** name_list_ptr;
+  int result;
 
-  error = NULL;
-  connection = dbus_bus_get(DBUS_BUS_SESSION, &err);
+  if ((result = add_app_in_dbus(argv[1])))
+    return result;
 
-  if (connection == NULL)
-  {
-    g_printerr("Failed to open connection to bus: %s\n",
-               error->message);
-    g_error_free(error);
-    exit(1);
-  }
+  conn = dbus_g_bus_get(DBUS_BUS_SESSION, &error);
 
-  int ret = dbus_bus_request_name(connection, "hellooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo.world.client", DBUS_NAME_FLAG_DO_NOT_QUEUE, &err);
-
-  if (dbus_error_is_set(&err))
-  {
-    printf("Name error: %s -- %s\n", err.name, err.message);
-    dbus_error_free(&err);
-    return 2;
-  }
-  printf("%d %d\n", ret, DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER);
-  
-  if (ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
-    return 2;
-  if (connection == NULL)
-  {
-    g_printerr("Failed to open connection to bus: %s\n",
-               error->message);
-    g_error_free(error);
-    exit(1);
-  }
-
-  /* Create a proxy object for the "bus driver" (name "org.freedesktop.DBus") */
-
-  //g_type_init();
-
-  error = NULL;
-  conn = dbus_g_bus_get (DBUS_BUS_SESSION,
-                           &error);
   if (conn == NULL)
-    {
-      g_printerr ("Failed to open connection to bus: %s\n",
-              error->message);
-      g_error_free (error);
-      exit (1);
-    }
+  {
+    g_printerr("Failed to open connection to bus: %s\n", error->message);
+    g_error_free(error);
+
+    return ERROR_GET_CONNECTION;
+  }
 
   proxy = dbus_g_proxy_new_for_name(conn,
-                                    DBUS_SERVICE_DBUS,
-                                    DBUS_PATH_DBUS,
-                                    DBUS_INTERFACE_DBUS);
+    DBUS_SERVICE_DBUS,
+    DBUS_PATH_DBUS,
+    DBUS_INTERFACE_DBUS);
 
-  /* Call ListNames method, wait for reply */
   error = NULL;
-  if (!dbus_g_proxy_call(proxy, "ListNames", &error, G_TYPE_INVALID,
-                         G_TYPE_STRV, &name_list, G_TYPE_INVALID))
+
+  if (!dbus_g_proxy_call(proxy, "ListNames", &error, G_TYPE_INVALID, G_TYPE_STRV, &name_list, G_TYPE_INVALID))
   {
-    /* Just do demonstrate remote exceptions versus regular GError */
     if (error->domain == DBUS_GERROR && error->code == DBUS_GERROR_REMOTE_EXCEPTION)
-      g_printerr("Caught remote method exception %s: %s",
-                 dbus_g_error_get_name(error),
-                 error->message);
+      g_printerr("Caught remote method exception %s: %s", dbus_g_error_get_name(error), error->message);
     else
       g_printerr("Error: %s\n", error->message);
-    g_error_free(error);
-    exit(1);
-  }
 
-  /* Print the results */
+    g_error_free(error);
+    return ERROR_GET_PROXY;
+  }
 
   g_print("Names on the message bus:\n");
 
@@ -239,9 +210,9 @@ int main(void)
   {
     g_print("  %s\n", *name_list_ptr);
   }
-  g_strfreev(name_list);
 
-  g_object_unref(proxy);
+  // g_strfreev(name_list);
+  // g_object_unref(proxy);
 
   return 0;
 }
