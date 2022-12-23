@@ -9,8 +9,29 @@
 #define ERROR_GET_NAME          2
 #define ERROR_GET_PROXY         3
 #define ERROR_ARGC_NUMBER       4
+#define ERROR_OPEN_FILE         5
 
-int add_app_in_dbus(const char *string)
+
+// === THIS FUNCTION ADD INFO ABOUT APP INTO FILE ===
+
+
+void add_data_to_file(const char *name_in_dbus, const char *way_to_exec, char *expansions)
+{
+  FILE *file_data = fopen("./data/base.txt", "a");
+
+  if (file_data == NULL)
+    return;
+  
+  fprintf(file_data, "%s %s %s\n", name_in_dbus, way_to_exec, expansions);
+
+  fclose(file_data);
+}
+
+
+// === THIS FUNCTION ADD APP TO DBUS AND THEN WRITE INFO IN FILE ===
+
+
+int add_app_in_dbus(const char *name_in_dbus, const char *way_to_exec, char *expansions)
 {
   DBusConnection* connection;
   DBusError err;
@@ -25,7 +46,7 @@ int add_app_in_dbus(const char *string)
     return ERROR_GET_CONNECTION;
   }
 
-  int ret = dbus_bus_request_name(connection, string, DBUS_NAME_FLAG_DO_NOT_QUEUE, &err);
+  int ret = dbus_bus_request_name(connection, name_in_dbus, DBUS_NAME_FLAG_DO_NOT_QUEUE, &err);
 
   if (dbus_error_is_set(&err))
   {
@@ -46,124 +67,28 @@ int add_app_in_dbus(const char *string)
     return ERROR_GET_CONNECTION;
   }
 
-  // dbus_connection_read_write(connection, 0);
+  add_data_to_file(name_in_dbus, way_to_exec, expansions);
 
   return EXIT_SUCCESS;
 }
 
-void send_signal(DBusConnection* connection)
-{
-  DBusMessage* msg;
-  DBusMessageIter arg;
-  char* str = "hello world!";
 
-  // Создать объект сигнала
-  // param1: path (в этой логике это может быть любая строка, если она соответствует правилам)
-  // param2: interface (то же самое)
-  // param3: имя метода сигнала (должно соответствовать имени сервера)
-  if ((msg = dbus_message_new_signal("/hello", "aa.bb.cc", "alarm_test")) == NULL)
-  {
-    printf("message is NULL\n");
-    return;
-  }
-#if 0
-  // Это зависит от необходимости добавления. Вообще говоря, сигнал является односторонней передачей, плюс это предложение становится односторонним одноадресным
-  //param2: bus_name
-  if (!dbus_message_set_destination(msg, "hello.world.service"))
-  {
-    printf("memory error\n");
-  }
-#endif
+// === IN MAIN FUNCTION YOU CAN SEE PROTOTYPE HOW THIS APP WORK OR OUTPUT IN CONSOLE APPS IN DBUS AFTER APP WITH EXPANSIONS HAS ADDED ===
 
-  // Некоторые интерфейсы для добавления параметров
-  dbus_message_iter_init_append(msg, &arg);
-  dbus_message_iter_append_basic(&arg, DBUS_TYPE_STRING, &str);
-  // Присоединиться к команде
-  dbus_connection_send(connection, msg, NULL);
-  // Послать
-  dbus_connection_flush(connection);
-  // Освободить память
-  dbus_message_unref(msg);
-
-  return;
-}
-
-void send_method_call(DBusConnection* connection)
-{
-  DBusMessage* msg;
-  DBusMessageIter arg;
-  DBusPendingCall* pending;
-  int a = 100;
-  int b = 99;
-  int sum;
-
-  msg = dbus_message_new_method_call("hello.world.service", "/hello/world", "hello.world", "add");
-  if (msg == NULL)
-  {
-    printf("no memory\n");
-    return;
-  }
-
-  dbus_message_iter_init_append(msg, &arg);
-  if (!dbus_message_iter_append_basic(&arg, DBUS_TYPE_INT32, &a))
-  {
-    printf("no memory!");
-    dbus_message_unref(msg);
-    return;
-  }
-  if (!dbus_message_iter_append_basic(&arg, DBUS_TYPE_INT32, &b))
-  {
-    printf("no memory!");
-    dbus_message_unref(msg);
-    return;
-  }
-
-  if (!dbus_connection_send_with_reply(connection, msg, &pending, -1))
-  {
-    printf("no memeory!");
-    dbus_message_unref(msg);
-    return;
-  }
-
-  if (pending == NULL)
-  {
-    printf("Pending is NULL, may be disconnect...\n");
-    dbus_message_unref(msg);
-    return;
-  }
-  // send
-  dbus_connection_flush(connection);
-  dbus_message_unref(msg);
-
-  // Блокировать до получения ответа.
-  dbus_pending_call_block(pending);
-  msg = dbus_pending_call_steal_reply(pending);
-  if (msg == NULL)
-  {
-    printf("reply is null. error\n");
-    return;
-  }
-  // Свободная память в ожидании
-  dbus_pending_call_unref(pending);
-  // Параметры разбора
-  if (!dbus_message_iter_init(msg, &arg))
-    printf("no argument, error\n");
-  if (dbus_message_iter_get_arg_type(&arg) != DBUS_TYPE_INT32)
-  {
-    printf("paramter type error\n");
-  }
-
-  dbus_message_iter_get_basic(&arg, &sum);
-
-  printf(" a(%d) + b(%d) = %d\n", a, b, sum);
-  dbus_message_unref(msg);
-
-  return;
-}
 
 int main(int argc, char **argv)
 {
-  if (argc != 2)
+  if (argc == 2 && !strcmp(argv[1], "h"))
+  {
+    printf("Чтобы добавить в dbus приложение вводите параметры в таком таком виде:\n\"Название приложения на шине\"\
+ \"Способ запуска данного приложения\" \"Расширения, которое может обрабатывать приложение\"\n ");
+    printf("Названия расширений нужно вбивать через пробел, обязательно все расширения должны быть в двойных кавычках\n");
+    printf("Пример aaa.ooo.ttt vim \"txt html py c\"\n");
+
+    return 0;
+  }
+
+  if (argc <= 3)
     return ERROR_ARGC_NUMBER;
 
   DBusGConnection* conn;
@@ -173,7 +98,11 @@ int main(int argc, char **argv)
   char** name_list_ptr;
   int result;
 
-  if ((result = add_app_in_dbus(argv[1])))
+
+  // HERE WE ADD OUR APP IN DBUS
+
+
+  if ((result = add_app_in_dbus(argv[1], argv[2], argv[3])))
     return result;
 
   conn = dbus_g_bus_get(DBUS_BUS_SESSION, &error);
@@ -186,6 +115,10 @@ int main(int argc, char **argv)
     return ERROR_GET_CONNECTION;
   }
 
+
+  // HERE WE OUT APPS FROM DBUS
+
+  
   proxy = dbus_g_proxy_new_for_name(conn,
     DBUS_SERVICE_DBUS,
     DBUS_PATH_DBUS,
@@ -211,8 +144,8 @@ int main(int argc, char **argv)
     g_print("  %s\n", *name_list_ptr);
   }
 
-  // g_strfreev(name_list);
-  // g_object_unref(proxy);
+  g_strfreev(name_list);
+  g_object_unref(proxy);
 
   return 0;
 }
