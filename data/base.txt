@@ -1,2 +1,6 @@
-yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.ttttttttttttttttttttttttttttt vim txt doc odt
-aaa.ooo.ttt vim txt html py c
+yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.ttttttttttttttttttttttttttttt vim
+aaa.ooo.ttt vim
+py.tsf vim
+hello.world.developer start 
+hello.world.developeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar start
+hello.world.eee start
