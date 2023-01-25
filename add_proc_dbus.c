@@ -3,11 +3,28 @@
 #include <string.h>
 #include <unistd.h>
 #include <dbus/dbus.h>
+#include <sys/types.h>
+#include <sys/stat.h> 
 
 #include "read_data.h"
-#include "write_data.h"
 
 #define ERROR_CONNECTION        10
+
+int daemon_int(void)
+{
+    pid_t pid;
+
+    if ((pid = fork()) < 0)
+        return EXIT_FAILURE;
+    else if (pid != 0)
+       exit(0);
+
+    setsid();  
+    chdir("/");
+    umask(0); 
+    
+    return EXIT_SUCCESS;
+}
 
 DBusConnection *init_bus(char *name)
 {
@@ -43,49 +60,21 @@ DBusConnection *init_bus(char *name)
 
 int main(int argc, char **argv)
 {
-    FILE *f = fopen("./data/base.txt", "r");
     DBusConnection *connection;
 
     char name_in_dbus[LEN_STRING], way_to_exec[LEN_STRING], expansions[LEN_STRING];
-    
-    if (argc == 1)
-    {
-        while (!get_one_record(f, name_in_dbus, way_to_exec, expansions))
-        {
-            connection = init_bus(name_in_dbus);
 
-            if (connection == NULL)
-            {
-                printf("Connect to bus failed...\n");
-                return ERROR_CONNECTION;
-            }
-        }
+    FILE *f = fopen("./data/base.txt", "r");
+    while (!get_one_record(f, name_in_dbus, way_to_exec, expansions))
+    {
+        connection = init_bus(name_in_dbus);
+
+        if (connection == NULL)
+            printf("Connect to bus failed...\n");
     }
 
-    int code_return;
-
-    if (argc == 2 && !strcmp(argv[1], "add"))
-    {
-        if ((code_return = get_app_info()))
-            return code_return;
-
-        dbus_connection_dispatch(connection);
-        while (!get_one_record(f, name_in_dbus, way_to_exec, expansions))
-        {
-            connection = init_bus(name_in_dbus);
-
-            if (connection == NULL)
-            {
-                printf("Connect to bus failed...\n");
-                return ERROR_CONNECTION;
-            }
-        }
-    }   
-
-    while(1)
-    {
-	    sleep(5);
-    }
+    fclose(f);
+    daemon_int();
 
     return EXIT_SUCCESS;
 }

@@ -3,3 +3,6 @@ hello.worldd.client start py
 hello.worlddd.client start html
 hello.worldddd.client start js
 hello.worlddddd.client start sh
+hello.worldddddd.client start txt
+hello.worldddddddd.client start txt
+helloo.world.client start txt

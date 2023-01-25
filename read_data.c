@@ -60,18 +60,17 @@ int get_one_record(FILE *f, char *name_in_dbus, char *way_to_exec, char *expansi
     return EXIT_SUCCESS;
 }
 
-// int main(int argc, char **argv)
-// {
-//     FILE *f = fopen("./data/base.txt", "r");
+int count_records()
+{
+    FILE *f = fopen("./data/base.txt", "r");
+    int counter = 0;
+    int ch;
 
-//     char name_in_dbus[LEN_STRING], way_to_exec[LEN_STRING], expansions_string[LEN_STRING];
-//     char *expansion = argv[1];
+    do
+    {
+        ch = fgetc(f);
+        if(ch == '\n') counter++;   
+    } while( ch != EOF );    
 
-//     while (!get_one_record(f, name_in_dbus, way_to_exec, expansions_string))
-//     {
-//         int rc = is_expansion_in_string(expansions_string, expansion);
-//         printf("%s %s %s - %d\n", name_in_dbus, way_to_exec, expansions_string, rc);
-//     }
-
-//     fclose(f);
-// }
+    return counter;
+}
