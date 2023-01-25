@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "write_data.h"
+
 #define READ_STRING             1
 #define LEN_STRING              256
 
@@ -15,7 +17,6 @@
 void delete_space(char *string)
 {
     int j = 0;
-    char new_string[LEN_STRING];
 
     for (int i = 0; i < LEN_STRING; i++)
     {
@@ -76,13 +77,6 @@ int get_app_info(void)
 
     if ((code_return = write_app_info(name_in_dbus, way_to_start, expansions)))
         return code_return;
-
-    return EXIT_SUCCESS;
-}
-
-int main(void)
-{
-    get_app_info();
 
     return EXIT_SUCCESS;
 }

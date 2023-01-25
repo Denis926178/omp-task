@@ -1,6 +1,5 @@
-yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.ttttttttttttttttttttttttttttt vim
-aaa.ooo.ttt vim
-py.tsf vim
-hello.world.developer start 
-hello.world.developeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar start
-hello.world.eee start
+hello.world.client start c
+hello.worldd.client start py
+hello.worlddd.client start html
+hello.worldddd.client start js
+hello.worlddddd.client start sh
