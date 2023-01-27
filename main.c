@@ -41,6 +41,10 @@ void send_signal(DBusConnection *connection)
 	DBusMessageIter arg;
 	char *str = "hello world!";
  
+	// Создаем объект сигнала
+	// param1: path (в этой логике это может быть любая строка, если она соответствует правилам)
+	// param2: interface (то же самое)
+	// param3: имя метода сигнала (должно совпадать с именем сервера)
 	if((msg = dbus_message_new_signal("/hello", "aa.bb.cc", "alarm_test")) == NULL)
 	{
 		printf("message is NULL\n");
@@ -55,10 +59,14 @@ void send_signal(DBusConnection *connection)
         }
 #endif
  
+	// Добавляем несколько интерфейсов для параметров
 	dbus_message_iter_init_append(msg, &arg);
 	dbus_message_iter_append_basic(&arg, DBUS_TYPE_STRING, &str);
+	//Вход
 	dbus_connection_send(connection, msg, NULL);
+	//Отправить
 	dbus_connection_flush(connection);
+	// Освободить память
 	dbus_message_unref(msg);
  
 	return;
@@ -73,7 +81,7 @@ void send_method_call(DBusConnection *connection)
 	int b = 99;
 	int sum;
  
-	msg = dbus_message_new_method_call("hello.world.service", "/hello/world","hello.world", "add");
+	msg = dbus_message_new_method_call("hello.world.service", "/hello/world", "hello.world", "add");
 	if(msg == NULL)
 	{
 		printf("no memory\n");
@@ -92,6 +100,11 @@ void send_method_call(DBusConnection *connection)
         	return;
     	}
  
+    // Входное сообщение, ожидаем ответа
+    // param1: дескриптор соединения
+    //param2:　message
+    // param3: дескриптор, эквивалентный обратному вызову, чтобы получить возвращенное сообщение
+    // param4: Со временем. -1 означает неограниченный
     if(!dbus_connection_send_with_reply (connection, msg, &pending, -1)){
         printf("no memeory!");
         dbus_message_unref(msg);
@@ -110,7 +123,7 @@ void send_method_call(DBusConnection *connection)
 	// Блокировать до получения ответа.
     dbus_pending_call_block(pending);
     msg = dbus_pending_call_steal_reply(pending);
-
+    
     if (msg == NULL) {
     	printf("reply is null. error\n");
     	return;

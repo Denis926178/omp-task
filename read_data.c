@@ -1,18 +1,35 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
- 
 #include "read_data.h"
 
 #define READ_STRING         1
-#define LEN_STRING          256
-#define LEN_EXPANSION       10
 
 #define ENTER               '\n'
 #define SPACE               ' '
 #define ZERO_SYMB           '\0'
+#define DOT                 '.'
 
 #define ERROR_READ_DATA     4
+
+void get_expansion(char *filename, char *expansion)
+{
+    while (*filename!= ZERO_SYMB)
+    {
+        if (*filename == DOT)
+            break;
+        
+        filename++;
+    }
+    
+    int i = 0;
+    filename++;
+
+    while (*filename != ZERO_SYMB)
+    {
+        expansion[i++] = *filename;
+        filename++;
+    }
+
+    expansion[i] = ZERO_SYMB;
+}
 
 int is_expansion_in_string(char *expansions_string, char *expansion)
 {
@@ -36,7 +53,7 @@ int is_expansion_in_string(char *expansions_string, char *expansion)
         expansions_string++;
     }
 
-    temp_expansion[i] = '\0';
+    temp_expansion[i] = ZERO_SYMB;
     if (strcmp(expansion, temp_expansion) == 0)
         return EXIT_SUCCESS;
 
@@ -69,7 +86,7 @@ int count_records()
     do
     {
         ch = fgetc(f);
-        if(ch == '\n') counter++;   
+        if(ch == ENTER) counter++;   
     } while( ch != EOF );    
 
     return counter;

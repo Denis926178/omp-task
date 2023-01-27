@@ -1,14 +1,8 @@
- 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "write_data.h"
 
 #define READ_STRING             1
-#define LEN_STRING              256
 
-#define CHAR_SPACE              ' '
+#define SPACE                   ' '
 
 #define ERROR_READ_APP_INFO     1
 #define ERROR_OPEN_FILE         2
@@ -20,7 +14,7 @@ void delete_space(char *string)
 
     for (int i = 0; i < LEN_STRING; i++)
     {
-        if (string[i] == CHAR_SPACE && (j == 0 || string[i + 1] == CHAR_SPACE))
+        if (string[i] == SPACE && (j == 0 || string[i + 1] == SPACE))
             continue;
 
         string[j++] = string[i];
