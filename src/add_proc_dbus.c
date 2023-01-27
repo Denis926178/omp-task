@@ -17,7 +17,7 @@ int daemon_int(void)
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
     DBusConnection *connection;
 

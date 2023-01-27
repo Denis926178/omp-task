@@ -31,16 +31,16 @@ OUT_WORK_FILE 		= $(OUT_DIR)/work_file.o $(OUT_DIR)/dbus_functions.o $(OUT_DIR)/
 OUT_REGISTER_APP 	= $(OUT_DIR)/write_data.o $(OUT_DIR)/register_new.o
 
 $(OUT_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(DEPFLAGS) $(CFLAGS) $(INCLUDE_MY) $(INCLUDE_DBUS) -c -o $@ $<
+	$(CC) $(DEPFLAGS) $(CFLAGS) -c -o $@ $< $(INCLUDE_MY) $(INCLUDE_DBUS)
 
 register_new_app.exe: $(OUT_REGISTER_APP)
 	$(CC) $(CFLAGS) -o $@ $^
 
 start_dbus.exe: $(OUT_START_DBUS)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(INCLUDE_DBUS)
 
 work_file.exe: $(OUT_WORK_FILE)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(INCLUDE_DBUS)
 
 clean_out:
 	rm -rf $(OUT_DIR)
