@@ -1,8 +1,1 @@
-hello.world.client start py
-hello.worldd.client start py
-hello.worlddd.client start html
-hello.worldddd.client start js
-hello.worlddddd.client start sh
-hello.worldddddd.client start txt
-hello.worldddddddd.client start txt
-helloo.world.client start c txt txt c
+hello.world.developer /hello/world hello.world.open open c py exe html o

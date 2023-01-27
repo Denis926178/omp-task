@@ -27,7 +27,7 @@ int main(void)
     char signal[LEN_STRING];
     char expansion_string[LEN_STRING];
 
-    FILE *f = fopen("../data/base.txt", "r");
+    FILE *f = fopen("./data/base.txt", "r");
 
     if (f == NULL)
         return ERROR_OPEN_FILE;
@@ -41,7 +41,7 @@ int main(void)
     }
 
     fclose(f);
-    daemon_int();
+    int code_return = daemon_int();
 
-    return EXIT_SUCCESS;
+    return code_return;
 }

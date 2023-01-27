@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     strcat(path_name, "/");
     strcat(path_name, filename);
 
-    FILE *f = fopen("../data/base.txt", "r");
+    FILE *f = fopen("./data/base.txt", "r");
 
     if (f == NULL)
         ERROR(2, "Ошибка, невозможно посмотреть список приложений, работающих с данной утилитой");

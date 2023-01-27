@@ -55,7 +55,7 @@ reg:
 	./register_new_app.exe
 
 start:
-	./start_dbus.exe
+	./start_dbus.exe &
 
 all: register_new_app.exe start_dbus.exe work_file.exe
 

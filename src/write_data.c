@@ -39,7 +39,7 @@ int read_field(char *string)
 
 int write_app_info(char *name_in_dbus, char *path, char *interface, char *signal, char *expansion_string)
 {
-    FILE *f = fopen("../data/base.txt", "a+");
+    FILE *f = fopen("./data/base.txt", "a+");
 
     if (f == NULL)
         return ERROR_OPEN_FILE;
