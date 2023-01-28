@@ -11,6 +11,9 @@
 
 void get_expansion(char *filename, char *expansion)
 {
+    if (*filename == DOT)
+        filename++;
+        
     for (; *filename!= ZERO_SYMB; filename++)
         if (*filename == DOT)
             break;

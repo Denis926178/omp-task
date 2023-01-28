@@ -20,7 +20,7 @@ INCLUDE_DBUS = -I/usr/include/dbus-1.0 \
 
 INCLUDE_MY = -I$(INC_DIR)
 
-# $(shell mkdir $(OUT_DIR))
+$(shell mkdir $(OUT_DIR))
 
 SRC = $(wildcard $(SRC_DIR)/*.c)
 OBJ = $(SRC:$(SRC_DIR)/%.c=$(OUT_DIR)/%.o)
@@ -48,17 +48,17 @@ clean_out:
 clean_exe:
 	rm *.exe
 
-clean_all:
-	clean_out clean_exe
-
 reg:
 	./register_new_app.exe
 
 start:
-	./start_dbus.exe &
+	./start_dbus.exe
 
-all: register_new_app.exe start_dbus.exe work_file.exe
+send:
+	./work_file.exe
 
-.PHONY: clean_all clean_out clean_exe reg start all
+all: work_file.exe
+
+.PHONY: clean_out clean_exe reg start all send
 
 -include $(DEP)

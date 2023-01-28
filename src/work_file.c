@@ -22,7 +22,7 @@ int is_file_valid(char *filename)
 
 int main(int argc, char **argv)
 {
-    if (argc != 1)
+    if (argc != 2)
         ERROR(6, "Неверное количество файлов");
 
     char name_in_dbus[LEN_STRING];
@@ -51,31 +51,34 @@ int main(int argc, char **argv)
     if (f == NULL)
         ERROR(2, "Ошибка, невозможно посмотреть список приложений, работающих с данной утилитой");
 
+    int counter = 0;
     DBusConnection *connection;
-    connection = init_bus(name_in_dbus);
 
-        if (connection == NULL)
-            printf("Connect to bus failed...\n");
     while (!get_one_record(f, name_in_dbus, path, interface, signal, expansion_string))
         if (!is_expansion_in_string(expansion_string, expansion))
         {   
-            connection = init_bus(name_in_dbus);
+            connection = init_bus("helloo.world.client");
 
             if (connection == NULL)
-            {
-                printf("Невозможно подключится к сессионной шине dbus\n");
-                return ERROR_CONNECTION;
-            }
+                ERROR(ERROR_CONNECTION, "Невозможно подключиться к сессионной шине dbus");
 
-            printf("Название приложения в dbus: %s\n", name_in_dbus);
-            printf("Путь к объекту, зарегестрированному в dbus: %s\n", path);
-            printf("Интерфейс, работающий с файлом: %s\n", interface);
-            printf("Сигнал, отправляемый приложению, которое будет работать с файлом: %s\n", signal);
-            printf("Список расширений, с которыми данное приложение может работать: %s\n", expansion_string);
-            printf("Полное имя файла, с которым будет работать приложение: %s\n", path_name);
-            send_signal(connection, path, interface, signal, expansion_string);
+            printf("    Название приложения в dbus: %s\n", name_in_dbus);
+            printf("    Путь к объекту, зарегестрированному в dbus: %s\n", path);
+            printf("    Интерфейс, работающий с файлом: %s\n", interface);
+            printf("    Сигнал, отправляемый приложению, которое будет работать с файлом: %s\n", signal);
+            printf("    Список расширений, с которыми данное приложение может работать: %s\n", expansion_string);
+            printf("    Полное имя файла, с которым будет работать приложение: %s\n", path_name);
+
+            int code_return = send_signal(connection, path, interface, signal, expansion_string);
+            if (!code_return)
+            {
+                counter = 1;
+                break;
+            }
         }
-        
+    
+    if (!counter)
+        ERROR(7, "Нет приложения, которое может обработать данный файл");
 
     return EXIT_SUCCESS;
 }

@@ -1,1 +1,3 @@
-hello.world.developer /hello/world hello.world.open open c py exe html o
+hello.world.client /hello/world hello.world.open open c py exe html o
+hello.worldd.client /hello/worldd hello.worldd.open open py exe h html css
+hello.worlddd.client /hello/world hello.worlddd.open open c html py

@@ -1,9 +1,9 @@
 #include "dbus_functions.h"
 
-#define ERROR_MEMORY(print_msg, msg) { printf("%s\n", print_msg); dbus_message_unref(msg); return; }
+#define ERROR_MEMORY(print_msg, msg) { printf("%s\n", print_msg); dbus_message_unref(msg); return EXIT_FAILURE; }
 #define ERROR(text_error, name_error, error_msg) { printf("%s%s -- %s\n", text_error, name_error, error_msg); dbus_error_free(&error); return NULL; }
 
-void send_signal(DBusConnection *connection, char *path, char *interface, char *signal, char *filename)
+int send_signal(DBusConnection *connection, char *path, char *interface, char *signal, char *filename)
 {
     DBusMessage *msg;
     DBusMessageIter arg;
@@ -11,20 +11,21 @@ void send_signal(DBusConnection *connection, char *path, char *interface, char *
     if ((msg = dbus_message_new_signal(path, interface, signal)) == NULL)
     {
         printf("Сообщение - NULL\n");
-        return;
+        return EXIT_FAILURE;
     }
 
     dbus_message_iter_init_append(msg, &arg);
-    
-    if (!dbus_message_iter_append_basic(&arg, DBUS_TYPE_STRING, filename))
+
+    if (!dbus_message_iter_append_basic(&arg, DBUS_TYPE_STRING, &filename))
         ERROR_MEMORY("Ошибка при выделении памяти", msg);
-        
+
     dbus_connection_send(connection, msg, NULL);
     dbus_connection_flush(connection);
     dbus_message_unref(msg);
+    
+    printf("        Файл был передан приложению\n");
 
-    printf("Файл был передан приложению\n");
-    return;
+    return EXIT_SUCCESS;
 }
 
 DBusConnection *init_bus(char *name)
