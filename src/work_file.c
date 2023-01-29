@@ -57,7 +57,7 @@ int main(int argc, char **argv)
     while (!get_one_record(f, name_in_dbus, path, interface, signal, expansion_string))
         if (!is_expansion_in_string(expansion_string, expansion))
         {   
-            connection = init_bus("helloo.world.client");
+            connection = init_bus("helloooo.world.client");
 
             if (connection == NULL)
                 ERROR(ERROR_CONNECTION, "Невозможно подключиться к сессионной шине dbus");

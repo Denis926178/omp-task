@@ -20,7 +20,7 @@ INCLUDE_DBUS = -I/usr/include/dbus-1.0 \
 
 INCLUDE_MY = -I$(INC_DIR)
 
-$(shell mkdir $(OUT_DIR))
+$(shell test -d $(OUT_DIR) || mkdir $(OUT_DIR))
 
 SRC = $(wildcard $(SRC_DIR)/*.c)
 OBJ = $(SRC:$(SRC_DIR)/%.c=$(OUT_DIR)/%.o)
@@ -55,7 +55,7 @@ start:
 	./start_dbus.exe
 
 send:
-	./work_file.exe
+	./work_file.exe ./src/work_file.c
 
 all: work_file.exe
 

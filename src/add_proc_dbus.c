@@ -47,16 +47,17 @@ int main(void)
     if (f == NULL)
         return ERROR_OPEN_FILE;
 
-    FILE *reg_app = fopen("./data/temp.txt", "a+");
-
-    if (reg_app == NULL)
-    {
-        fclose(f);
-        return ERROR_OPEN_FILE;
-    }
 
     while (!get_one_record(f, name_in_dbus, path, interface, signal, expansion_string))
     {
+        FILE *reg_app = fopen("./data/temp.txt", "r");
+
+        if (reg_app == NULL)
+        {
+            fclose(f);
+            return ERROR_OPEN_FILE;
+        }
+
         if (!is_app_reg(reg_app, name_in_dbus))
         {
             fclose(reg_app);
@@ -64,12 +65,23 @@ int main(void)
         }
         
         fclose(reg_app);
-        connection = init_bus(name_in_dbus);
 
-        if (!connection)
-            fprintf(f, "%s\n", name_in_dbus);
+        connection = init_bus(name_in_dbus);
+        
+        reg_app = fopen("./data/temp.txt", "a+");
+
+        if (reg_app == NULL)
+        {
+            fclose(f);
+            return ERROR_OPEN_FILE;
+        }
+
+        if (connection)
+            fprintf(reg_app, "%s\n", name_in_dbus);
         else
             printf("Не удалось установить соединение\n");
+        
+        fclose(reg_app);
     }
 
     fclose(f);
